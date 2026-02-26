@@ -1,9 +1,7 @@
 import { Category, Recipe } from "@types/recipe";
-import axios from "axios";
 import { recipeApi } from "./recipeApi";
 
-jest.mock("axios");
-const mockedAxios = axios as jest.Mocked<typeof axios>;
+global.fetch = jest.fn();
 
 describe("Recipe API Service", () => {
   beforeEach(() => {
@@ -47,18 +45,19 @@ describe("Recipe API Service", () => {
   describe("getRecipesByCategory", () => {
     it("should fetch recipes by category successfully", async () => {
       const mockResponse = {
-        data: {
+        ok: true,
+        json: jest.fn().mockResolvedValue({
           meals: [mockRecipe, mockRecipe2],
-        },
+        }),
       };
-      mockedAxios.get.mockResolvedValueOnce(mockResponse);
+      (global.fetch as jest.Mock).mockResolvedValueOnce(mockResponse);
 
       const result = await recipeApi.getRecipesByCategory("Seafood");
 
-      expect(mockedAxios.get).toHaveBeenCalledWith(
+      expect(global.fetch).toHaveBeenCalledWith(
         "https://www.themealdb.com/api/json/v1/1/filter.php?c=Seafood",
       );
-      expect(mockedAxios.get).toHaveBeenCalledTimes(1);
+      expect(global.fetch).toHaveBeenCalledTimes(1);
 
       expect(result).toHaveLength(2);
       expect(result[0].idMeal).toBe("52772");
@@ -67,26 +66,28 @@ describe("Recipe API Service", () => {
 
     it("should use default category 'Seafood' when no category is provided", async () => {
       const mockResponse = {
-        data: {
+        ok: true,
+        json: jest.fn().mockResolvedValue({
           meals: [mockRecipe],
-        },
+        }),
       };
-      mockedAxios.get.mockResolvedValueOnce(mockResponse);
+      (global.fetch as jest.Mock).mockResolvedValueOnce(mockResponse);
 
       await recipeApi.getRecipesByCategory();
 
-      expect(mockedAxios.get).toHaveBeenCalledWith(
+      expect(global.fetch).toHaveBeenCalledWith(
         "https://www.themealdb.com/api/json/v1/1/filter.php?c=Seafood",
       );
     });
 
     it("should return empty array when API returns null", async () => {
       const mockResponse = {
-        data: {
+        ok: true,
+        json: jest.fn().mockResolvedValue({
           meals: null,
-        },
+        }),
       };
-      mockedAxios.get.mockResolvedValueOnce(mockResponse);
+      (global.fetch as jest.Mock).mockResolvedValueOnce(mockResponse);
 
       const result = await recipeApi.getRecipesByCategory("Seafood");
 
@@ -95,9 +96,10 @@ describe("Recipe API Service", () => {
 
     it("should return empty array when API returns no meals property", async () => {
       const mockResponse = {
-        data: {},
+        ok: true,
+        json: jest.fn().mockResolvedValue({}),
       };
-      mockedAxios.get.mockResolvedValueOnce(mockResponse);
+      (global.fetch as jest.Mock).mockResolvedValueOnce(mockResponse);
 
       const result = await recipeApi.getRecipesByCategory("Seafood");
 
@@ -105,7 +107,23 @@ describe("Recipe API Service", () => {
     });
 
     it("should handle network errors gracefully", async () => {
-      mockedAxios.get.mockRejectedValueOnce(new Error("Network error"));
+      (global.fetch as jest.Mock).mockRejectedValueOnce(
+        new Error("Network error"),
+      );
+
+      const result = await recipeApi.getRecipesByCategory("Seafood");
+
+      expect(result).toEqual([]);
+      expect(console.error).toHaveBeenCalled();
+    });
+
+    it("should handle HTTP errors (non-200 responses)", async () => {
+      const mockResponse = {
+        ok: false,
+        status: 500,
+        statusText: "Internal Server Error",
+      };
+      (global.fetch as jest.Mock).mockResolvedValueOnce(mockResponse);
 
       const result = await recipeApi.getRecipesByCategory("Seafood");
 
@@ -117,18 +135,19 @@ describe("Recipe API Service", () => {
   describe("getRecipeDetails", () => {
     it("should fetch recipe details by id successfully", async () => {
       const mockResponse = {
-        data: {
+        ok: true,
+        json: jest.fn().mockResolvedValue({
           meals: [mockRecipe],
-        },
+        }),
       };
-      mockedAxios.get.mockResolvedValueOnce(mockResponse);
+      (global.fetch as jest.Mock).mockResolvedValueOnce(mockResponse);
 
       const result = await recipeApi.getRecipeDetails("52772");
 
-      expect(mockedAxios.get).toHaveBeenCalledWith(
+      expect(global.fetch).toHaveBeenCalledWith(
         "https://www.themealdb.com/api/json/v1/1/lookup.php?i=52772",
       );
-      expect(mockedAxios.get).toHaveBeenCalledTimes(1);
+      expect(global.fetch).toHaveBeenCalledTimes(1);
 
       expect(result).toEqual(mockRecipe);
       expect(result?.idMeal).toBe("52772");
@@ -137,11 +156,12 @@ describe("Recipe API Service", () => {
 
     it("should return null when recipe is not found", async () => {
       const mockResponse = {
-        data: {
+        ok: true,
+        json: jest.fn().mockResolvedValue({
           meals: null,
-        },
+        }),
       };
-      mockedAxios.get.mockResolvedValueOnce(mockResponse);
+      (global.fetch as jest.Mock).mockResolvedValueOnce(mockResponse);
 
       const result = await recipeApi.getRecipeDetails("invalid-id");
 
@@ -150,9 +170,10 @@ describe("Recipe API Service", () => {
 
     it("should return null when API returns no meals property", async () => {
       const mockResponse = {
-        data: {},
+        ok: true,
+        json: jest.fn().mockResolvedValue({}),
       };
-      mockedAxios.get.mockResolvedValueOnce(mockResponse);
+      (global.fetch as jest.Mock).mockResolvedValueOnce(mockResponse);
 
       const result = await recipeApi.getRecipeDetails("52772");
 
@@ -160,7 +181,9 @@ describe("Recipe API Service", () => {
     });
 
     it("should handle network errors gracefully", async () => {
-      mockedAxios.get.mockRejectedValueOnce(new Error("Network error"));
+      (global.fetch as jest.Mock).mockRejectedValueOnce(
+        new Error("Network error"),
+      );
 
       const result = await recipeApi.getRecipeDetails("52772");
 
@@ -172,18 +195,19 @@ describe("Recipe API Service", () => {
   describe("getCategories", () => {
     it("should fetch categories successfully", async () => {
       const mockResponse = {
-        data: {
+        ok: true,
+        json: jest.fn().mockResolvedValue({
           categories: [mockCategory],
-        },
+        }),
       };
-      mockedAxios.get.mockResolvedValueOnce(mockResponse);
+      (global.fetch as jest.Mock).mockResolvedValueOnce(mockResponse);
 
       const result = await recipeApi.getCategories();
 
-      expect(mockedAxios.get).toHaveBeenCalledWith(
+      expect(global.fetch).toHaveBeenCalledWith(
         "https://www.themealdb.com/api/json/v1/1/categories.php",
       );
-      expect(mockedAxios.get).toHaveBeenCalledTimes(1);
+      expect(global.fetch).toHaveBeenCalledTimes(1);
 
       expect(result).toHaveLength(1);
       expect(result[0].idCategory).toBe("1");
@@ -192,11 +216,12 @@ describe("Recipe API Service", () => {
 
     it("should return empty array when API returns null", async () => {
       const mockResponse = {
-        data: {
+        ok: true,
+        json: jest.fn().mockResolvedValue({
           categories: null,
-        },
+        }),
       };
-      mockedAxios.get.mockResolvedValueOnce(mockResponse);
+      (global.fetch as jest.Mock).mockResolvedValueOnce(mockResponse);
 
       const result = await recipeApi.getCategories();
 
@@ -205,9 +230,10 @@ describe("Recipe API Service", () => {
 
     it("should return empty array when API returns no categories property", async () => {
       const mockResponse = {
-        data: {},
+        ok: true,
+        json: jest.fn().mockResolvedValue({}),
       };
-      mockedAxios.get.mockResolvedValueOnce(mockResponse);
+      (global.fetch as jest.Mock).mockResolvedValueOnce(mockResponse);
 
       const result = await recipeApi.getCategories();
 
@@ -215,7 +241,9 @@ describe("Recipe API Service", () => {
     });
 
     it("should handle network errors gracefully", async () => {
-      mockedAxios.get.mockRejectedValueOnce(new Error("Network error"));
+      (global.fetch as jest.Mock).mockRejectedValueOnce(
+        new Error("Network error"),
+      );
 
       const result = await recipeApi.getCategories();
 
@@ -227,18 +255,19 @@ describe("Recipe API Service", () => {
   describe("searchRecipes", () => {
     it("should search recipes by query successfully", async () => {
       const mockResponse = {
-        data: {
+        ok: true,
+        json: jest.fn().mockResolvedValue({
           meals: [mockRecipe, mockRecipe2],
-        },
+        }),
       };
-      mockedAxios.get.mockResolvedValueOnce(mockResponse);
+      (global.fetch as jest.Mock).mockResolvedValueOnce(mockResponse);
 
       const result = await recipeApi.searchRecipes("chicken");
 
-      expect(mockedAxios.get).toHaveBeenCalledWith(
+      expect(global.fetch).toHaveBeenCalledWith(
         "https://www.themealdb.com/api/json/v1/1/search.php?s=chicken",
       );
-      expect(mockedAxios.get).toHaveBeenCalledTimes(1);
+      expect(global.fetch).toHaveBeenCalledTimes(1);
 
       expect(result).toHaveLength(2);
       expect(result[0].idMeal).toBe("52772");
@@ -249,16 +278,17 @@ describe("Recipe API Service", () => {
       const result = await recipeApi.searchRecipes("a");
 
       expect(result).toEqual([]);
-      expect(mockedAxios.get).not.toHaveBeenCalled();
+      expect(global.fetch).not.toHaveBeenCalled();
     });
 
     it("should return empty array when API returns null", async () => {
       const mockResponse = {
-        data: {
+        ok: true,
+        json: jest.fn().mockResolvedValue({
           meals: null,
-        },
+        }),
       };
-      mockedAxios.get.mockResolvedValueOnce(mockResponse);
+      (global.fetch as jest.Mock).mockResolvedValueOnce(mockResponse);
 
       const result = await recipeApi.searchRecipes("chicken");
 
@@ -267,9 +297,10 @@ describe("Recipe API Service", () => {
 
     it("should return empty array when API returns no meals property", async () => {
       const mockResponse = {
-        data: {},
+        ok: true,
+        json: jest.fn().mockResolvedValue({}),
       };
-      mockedAxios.get.mockResolvedValueOnce(mockResponse);
+      (global.fetch as jest.Mock).mockResolvedValueOnce(mockResponse);
 
       const result = await recipeApi.searchRecipes("chicken");
 
@@ -277,7 +308,9 @@ describe("Recipe API Service", () => {
     });
 
     it("should handle network errors gracefully", async () => {
-      mockedAxios.get.mockRejectedValueOnce(new Error("Network error"));
+      (global.fetch as jest.Mock).mockRejectedValueOnce(
+        new Error("Network error"),
+      );
 
       const result = await recipeApi.searchRecipes("chicken");
 
@@ -287,15 +320,16 @@ describe("Recipe API Service", () => {
 
     it("should handle search with special characters", async () => {
       const mockResponse = {
-        data: {
+        ok: true,
+        json: jest.fn().mockResolvedValue({
           meals: [mockRecipe],
-        },
+        }),
       };
-      mockedAxios.get.mockResolvedValueOnce(mockResponse);
+      (global.fetch as jest.Mock).mockResolvedValueOnce(mockResponse);
 
       const result = await recipeApi.searchRecipes("chicken & rice");
 
-      expect(mockedAxios.get).toHaveBeenCalledWith(
+      expect(global.fetch).toHaveBeenCalledWith(
         "https://www.themealdb.com/api/json/v1/1/search.php?s=chicken & rice",
       );
       expect(result).toHaveLength(1);
@@ -304,9 +338,12 @@ describe("Recipe API Service", () => {
 
   describe("Error handling", () => {
     it("should handle 404 errors gracefully", async () => {
-      mockedAxios.get.mockRejectedValueOnce({
-        response: { status: 404, data: "Not found" },
-      });
+      const mockResponse = {
+        ok: false,
+        status: 404,
+        statusText: "Not Found",
+      };
+      (global.fetch as jest.Mock).mockResolvedValueOnce(mockResponse);
 
       const result = await recipeApi.getRecipesByCategory("Seafood");
 
@@ -315,7 +352,7 @@ describe("Recipe API Service", () => {
     });
 
     it("should handle timeout errors gracefully", async () => {
-      mockedAxios.get.mockRejectedValueOnce(
+      (global.fetch as jest.Mock).mockRejectedValueOnce(
         new Error("timeout of 5000ms exceeded"),
       );
 
@@ -325,23 +362,30 @@ describe("Recipe API Service", () => {
       expect(console.error).toHaveBeenCalled();
     });
 
-    it("should handle malformed API responses", async () => {
-      mockedAxios.get.mockResolvedValueOnce("invalid response");
+    it("should handle malformed JSON responses", async () => {
+      const mockResponse = {
+        ok: true,
+        json: jest.fn().mockRejectedValueOnce(new Error("Invalid JSON")),
+      };
+      (global.fetch as jest.Mock).mockResolvedValueOnce(mockResponse);
 
       const result = await recipeApi.getCategories();
 
       expect(result).toEqual([]);
+      expect(console.error).toHaveBeenCalled();
     });
   });
 
   describe("API integration scenarios", () => {
     it("should handle multiple API calls in sequence", async () => {
-      mockedAxios.get.mockResolvedValueOnce({
-        data: { categories: [mockCategory] },
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: jest.fn().mockResolvedValue({ categories: [mockCategory] }),
       });
 
-      mockedAxios.get.mockResolvedValueOnce({
-        data: { meals: [mockRecipe] },
+      (global.fetch as jest.Mock).mockResolvedValueOnce({
+        ok: true,
+        json: jest.fn().mockResolvedValue({ meals: [mockRecipe] }),
       });
 
       const categories = await recipeApi.getCategories();
@@ -349,13 +393,15 @@ describe("Recipe API Service", () => {
 
       expect(categories).toHaveLength(1);
       expect(recipes).toHaveLength(1);
-      expect(mockedAxios.get).toHaveBeenCalledTimes(2);
+      expect(global.fetch).toHaveBeenCalledTimes(2);
     });
 
     it("should handle concurrent API calls", async () => {
-      mockedAxios.get.mockResolvedValue({
-        data: { meals: [mockRecipe] },
-      });
+      const mockFetchResponse = {
+        ok: true,
+        json: jest.fn().mockResolvedValue({ meals: [mockRecipe] }),
+      };
+      (global.fetch as jest.Mock).mockResolvedValue(mockFetchResponse);
 
       const [result1, result2] = await Promise.all([
         recipeApi.getRecipesByCategory("Seafood"),
@@ -364,11 +410,11 @@ describe("Recipe API Service", () => {
 
       expect(result1).toHaveLength(1);
       expect(result2).toHaveLength(1);
-      expect(mockedAxios.get).toHaveBeenCalledTimes(2);
-      expect(mockedAxios.get).toHaveBeenCalledWith(
+      expect(global.fetch).toHaveBeenCalledTimes(2);
+      expect(global.fetch).toHaveBeenCalledWith(
         expect.stringContaining("c=Seafood"),
       );
-      expect(mockedAxios.get).toHaveBeenCalledWith(
+      expect(global.fetch).toHaveBeenCalledWith(
         expect.stringContaining("c=Beef"),
       );
     });

@@ -1,49 +1,53 @@
 import { Category, Recipe } from "@types/recipe";
-import axios from "axios";
 
 const API_BASE = "https://www.themealdb.com/api/json/v1/1";
+
+async function fetchAPI<T>(endpoint: string): Promise<T | null> {
+  try {
+    const response = await fetch(`${API_BASE}${endpoint}`);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data as T;
+  } catch (error) {
+    console.error(`Erro na requisição para ${endpoint}:`, error);
+    return null;
+  }
+}
 
 export const recipeApi = {
   getRecipesByCategory: async (
     category: string = "Seafood",
   ): Promise<Recipe[]> => {
-    try {
-      const response = await axios.get(`${API_BASE}/filter.php?c=${category}`);
-      return response.data.meals || [];
-    } catch (error) {
-      console.error("Erro ao buscar receitas:", error);
-      return [];
-    }
+    const data = await fetchAPI<{ meals: Recipe[] | null }>(
+      `/filter.php?c=${category}`,
+    );
+    return data?.meals || [];
   },
 
   getRecipeDetails: async (id: string): Promise<Recipe | null> => {
-    try {
-      const response = await axios.get(`${API_BASE}/lookup.php?i=${id}`);
-      return response.data.meals?.[0] || null;
-    } catch (error) {
-      console.error("Erro ao buscar detalhes:", error);
-      return null;
-    }
+    const data = await fetchAPI<{ meals: Recipe[] | null }>(
+      `/lookup.php?i=${id}`,
+    );
+    return data?.meals?.[0] || null;
   },
 
   getCategories: async (): Promise<Category[]> => {
-    try {
-      const response = await axios.get(`${API_BASE}/categories.php`);
-      return response.data.categories || [];
-    } catch (error) {
-      console.error("Erro ao buscar categorias:", error);
-      return [];
-    }
+    const data = await fetchAPI<{ categories: Category[] | null }>(
+      `/categories.php`,
+    );
+    return data?.categories || [];
   },
 
   searchRecipes: async (query: string): Promise<Recipe[]> => {
     if (query.length < 2) return [];
-    try {
-      const response = await axios.get(`${API_BASE}/search.php?s=${query}`);
-      return response.data.meals || [];
-    } catch (error) {
-      console.error("Erro ao buscar receitas:", error);
-      return [];
-    }
+
+    const data = await fetchAPI<{ meals: Recipe[] | null }>(
+      `/search.php?s=${query}`,
+    );
+    return data?.meals || [];
   },
 };
