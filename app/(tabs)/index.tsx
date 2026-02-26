@@ -1,5 +1,5 @@
-import { LoadingSpinner } from "@components/ui/LoadingSpinner";
-import { RecipeCard } from "@components/ui/RecipeCard";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner/LoadingSpinner";
+import { RecipeCard } from "@/components/ui/RecipeCard/RecipeCard";
 import { recipeApi } from "@services/recipeApi";
 import { useQuery } from "@tanstack/react-query";
 import { Recipe } from "@types/recipe";

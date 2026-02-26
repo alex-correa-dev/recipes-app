@@ -9,14 +9,25 @@ interface Props {
 
 export const RecipeCard = ({ recipe, onPress }: Props) => {
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.7}>
-      <Image source={{ uri: recipe.strMealThumb }} style={styles.image} />
-      <View style={styles.content}>
-        <Text style={styles.title} numberOfLines={2}>
+    <TouchableOpacity
+      style={styles.card}
+      onPress={onPress}
+      activeOpacity={0.7}
+      testID="recipe-card"
+    >
+      <Image
+        source={{ uri: recipe.strMealThumb }}
+        style={styles.image}
+        testID="recipe-image"
+      />
+      <View style={styles.content} testID="recipe-content">
+        <Text style={styles.title} numberOfLines={2} testID="recipe-title">
           {recipe.strMeal}
         </Text>
         {recipe.strCategory && (
-          <Text style={styles.category}>{recipe.strCategory}</Text>
+          <Text style={styles.category} testID="recipe-category">
+            {recipe.strCategory}
+          </Text>
         )}
       </View>
     </TouchableOpacity>

@@ -1,5 +1,5 @@
-import { LoadingSpinner } from "@components/ui/LoadingSpinner";
-import { RecipeCard } from "@components/ui/RecipeCard";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner/LoadingSpinner";
+import { RecipeCard } from "@/components/ui/RecipeCard/RecipeCard";
 import { useFavorites } from "@hooks/useFavorites";
 import { router, useFocusEffect } from "expo-router";
 import React from "react";

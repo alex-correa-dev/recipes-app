@@ -1,4 +1,4 @@
-import { LoadingSpinner } from "@components/ui/LoadingSpinner";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner/LoadingSpinner";
 import { Ionicons } from "@expo/vector-icons";
 import { useFavorites } from "@hooks/useFavorites";
 import { recipeApi } from "@services/recipeApi";

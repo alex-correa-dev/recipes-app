@@ -1,6 +1,6 @@
-import { LoadingSpinner } from "@components/ui/LoadingSpinner";
-import { RecipeCard } from "@components/ui/RecipeCard";
-import { SearchBar } from "@components/ui/SearchBar";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner/LoadingSpinner";
+import { RecipeCard } from "@/components/ui/RecipeCard/RecipeCard";
+import { SearchBar } from "@/components/ui/SearchBar/SearchBar";
 import { recipeApi } from "@services/recipeApi";
 import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";

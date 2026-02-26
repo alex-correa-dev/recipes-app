@@ -2,8 +2,8 @@ import React from "react";
 import { ActivityIndicator, StyleSheet, View } from "react-native";
 
 export const LoadingSpinner = () => (
-  <View style={styles.container}>
-    <ActivityIndicator size="large" color="#ff4444" />
+  <View style={styles.container} testID="loading-container">
+    <ActivityIndicator size="large" color="#ff4444" testID="loading-spinner" />
   </View>
 );
 
