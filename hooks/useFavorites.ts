@@ -14,9 +14,14 @@ export const useFavorites = () => {
   }, []);
 
   const addFavorite = useCallback(async (recipe: Recipe) => {
-    const success = await storage.addFavorite(recipe);
-    if (success) await loadFavorites();
-    return success;
+    try {
+      const success = await storage.addFavorite(recipe);
+      if (success) await loadFavorites();
+      return success;
+    } catch (error) {
+      console.error("Error adding favorite:", error);
+      return false;
+    }
   }, []);
 
   const removeFavorite = useCallback(async (recipeId: string) => {
@@ -26,7 +31,12 @@ export const useFavorites = () => {
   }, []);
 
   const isFavorite = useCallback(async (recipeId: string) => {
-    return await storage.isFavorite(recipeId);
+    try {
+      return await storage.isFavorite(recipeId);
+    } catch (error) {
+      console.error("Error checking favorite:", error);
+      return false;
+    }
   }, []);
 
   useEffect(() => {
