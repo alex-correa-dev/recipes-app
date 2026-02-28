@@ -18,8 +18,8 @@ export default function FavoritesScreen() {
 
   if (favorites.length === 0) {
     return (
-      <View style={styles.emptyContainer}>
-        <Text style={styles.emptyText}>
+      <View style={styles.emptyContainer} testID="empty-container">
+        <Text style={styles.emptyText} testID="empty-text">
           Você ainda não tem receitas favoritas
         </Text>
       </View>
@@ -27,7 +27,7 @@ export default function FavoritesScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} testID="favorites-container">
       <FlatList
         data={favorites}
         keyExtractor={(item) => item.idMeal}
