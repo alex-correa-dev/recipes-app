@@ -11,7 +11,7 @@ export default function FavoritesScreen() {
   useFocusEffect(
     React.useCallback(() => {
       refresh();
-    }, []),
+    }, [refresh]),
   );
 
   if (loading) return <LoadingSpinner />;

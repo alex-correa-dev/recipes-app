@@ -4,7 +4,7 @@ import { useFavorites } from "@hooks/useFavorites";
 import { recipeApi } from "@services/recipeApi";
 import { Recipe } from "@types/recipe";
 import { useLocalSearchParams } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   Alert,
   Image,
@@ -23,31 +23,28 @@ export default function RecipeDetailScreen() {
   const { isFavorite, addFavorite, removeFavorite } = useFavorites();
   const [favorite, setFavorite] = useState(false);
 
-  useEffect(() => {
-    loadRecipe();
-    checkFavorite();
-  }, [id]);
-
-  const loadRecipe = async () => {
+  const loadRecipe = useCallback(async () => {
     setLoading(true);
-
     try {
       const data = await recipeApi.getRecipeDetails(id);
-
       setRecipe(data);
     } catch (error) {
       console.error("Erro ao carregar receita:", error);
-
       setRecipe(null);
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
-  const checkFavorite = async () => {
+  const checkFavorite = useCallback(async () => {
     const fav = await isFavorite(id);
     setFavorite(fav);
-  };
+  }, [id, isFavorite]);
+
+  useEffect(() => {
+    loadRecipe();
+    checkFavorite();
+  }, [loadRecipe, checkFavorite]);
 
   const toggleFavorite = async () => {
     if (!recipe) return;

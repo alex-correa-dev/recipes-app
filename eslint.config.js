@@ -1,17 +1,10 @@
-// https://docs.expo.dev/guides/using-eslint/
-const { defineConfig } = require("eslint/config");
+const { defineConfig, globalIgnores } = require("eslint/config");
 const expoConfig = require("eslint-config-expo/flat");
-const importPlugin = require("eslint-plugin-import");
 
 module.exports = defineConfig([
+  globalIgnores(["dist/*", "node_modules/*", ".expo/*"]),
   expoConfig,
   {
-    ignores: ["dist/*"],
-  },
-  {
-    plugins: {
-      import: importPlugin,
-    },
     settings: {
       "import/resolver": {
         typescript: {

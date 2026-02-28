@@ -1,6 +1,6 @@
+import Icon from "@expo/vector-icons/MaterialIcons";
 import React from "react";
 import { StyleSheet, TextInput, View } from "react-native";
-import Icon from "react-native-vector-icons/MaterialIcons";
 
 interface Props {
   value: string;

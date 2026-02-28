@@ -5,8 +5,8 @@ import { recipeApi } from "@services/recipeApi";
 import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { debounce } from "lodash";
-import React, { useCallback, useState } from "react";
-import { FlatList, StyleSheet, View } from "react-native";
+import React, { useCallback, useMemo, useState } from "react";
+import { FlatList, StyleSheet, Text, View } from "react-native";
 
 export default function SearchScreen() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -17,9 +17,13 @@ export default function SearchScreen() {
     enabled: searchQuery.length > 2,
   });
 
-  const debouncedSearch = useCallback(
-    debounce((text: string) => setSearchQuery(text), 500),
-    [],
+  const handleSearch = useCallback((text: string) => {
+    setSearchQuery(text);
+  }, []);
+
+  const debouncedSearch = useMemo(
+    () => debounce(handleSearch, 500),
+    [handleSearch],
   );
 
   return (

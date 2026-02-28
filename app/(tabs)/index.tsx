@@ -4,15 +4,15 @@ import { recipeApi } from "@services/recipeApi";
 import { useQuery } from "@tanstack/react-query";
 import { Recipe } from "@types/recipe";
 import { router } from "expo-router";
-import React, { useState } from "react";
+import React from "react";
 import { FlatList, StyleSheet, View } from "react-native";
 
 export default function HomeScreen() {
-  const [selectedCategory, setSelectedCategory] = useState("Seafood");
+  const category = "Seafood";
 
   const { data: recipes, isLoading } = useQuery({
-    queryKey: ["recipes", selectedCategory],
-    queryFn: () => recipeApi.getRecipesByCategory(selectedCategory),
+    queryKey: ["recipes", category],
+    queryFn: () => recipeApi.getRecipesByCategory(category),
   });
 
   const handleRecipePress = (recipe: Recipe) => {
