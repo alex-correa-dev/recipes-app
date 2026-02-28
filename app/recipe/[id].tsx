@@ -6,14 +6,14 @@ import { Recipe } from "@types/recipe";
 import { useLocalSearchParams } from "expo-router";
 import React, { useEffect, useState } from "react";
 import {
-    Alert,
-    Image,
-    Linking,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Alert,
+  Image,
+  Linking,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 
 export default function RecipeDetailScreen() {
@@ -30,9 +30,18 @@ export default function RecipeDetailScreen() {
 
   const loadRecipe = async () => {
     setLoading(true);
-    const data = await recipeApi.getRecipeDetails(id);
-    setRecipe(data);
-    setLoading(false);
+
+    try {
+      const data = await recipeApi.getRecipeDetails(id);
+
+      setRecipe(data);
+    } catch (error) {
+      console.error("Erro ao carregar receita:", error);
+
+      setRecipe(null);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const checkFavorite = async () => {
@@ -61,7 +70,6 @@ export default function RecipeDetailScreen() {
 
   if (loading || !recipe) return <LoadingSpinner />;
 
-  // Extrair ingredientes
   const ingredients = [];
   for (let i = 1; i <= 20; i++) {
     const ingredient = recipe[`strIngredient${i}`];
@@ -72,14 +80,23 @@ export default function RecipeDetailScreen() {
   }
 
   return (
-    <ScrollView style={styles.container}>
-      <Image source={{ uri: recipe.strMealThumb }} style={styles.image} />
+    <ScrollView style={styles.container} testID="recipe-container">
+      <Image
+        source={{ uri: recipe.strMealThumb }}
+        style={styles.image}
+        testID="recipe-image"
+      />
 
-      <TouchableOpacity style={styles.favoriteButton} onPress={toggleFavorite}>
+      <TouchableOpacity
+        style={styles.favoriteButton}
+        onPress={toggleFavorite}
+        testID="favorite-button"
+      >
         <Ionicons
           name={favorite ? "heart" : "heart-outline"}
           size={30}
           color={favorite ? "#ff4444" : "#fff"}
+          testID="favorite-icon"
         />
       </TouchableOpacity>
 
