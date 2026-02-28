@@ -23,7 +23,7 @@ export default function SearchScreen() {
   );
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} testID="search-container">
       <SearchBar
         onChangeText={debouncedSearch}
         placeholder="Digite o nome da receita..."
@@ -42,9 +42,10 @@ export default function SearchScreen() {
             />
           )}
           contentContainerStyle={styles.list}
+          testID="search-list"
           ListEmptyComponent={
             searchQuery.length > 2 ? (
-              <View style={styles.empty}>
+              <View style={styles.empty} testID="empty-container">
                 <Text>Nenhuma receita encontrada</Text>
               </View>
             ) : null
