@@ -22,7 +22,7 @@ export default function HomeScreen() {
   if (isLoading) return <LoadingSpinner />;
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} testID="home-container">
       <FlatList
         data={recipes}
         keyExtractor={(item) => item.idMeal}
@@ -30,6 +30,7 @@ export default function HomeScreen() {
           <RecipeCard recipe={item} onPress={() => handleRecipePress(item)} />
         )}
         contentContainerStyle={styles.list}
+        testID="recipes-list"
       />
     </View>
   );
